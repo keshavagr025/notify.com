@@ -1,3 +1,7 @@
 export default function MindMap() {
-    return <h2 className="text-xl font-semibold">Mind Map Page</h2>
+  return (
+    <div className="max-w-5xl mx-auto">
+      <h2 className="text-2xl font-semibold">Mind Map</h2>
+    </div>
+  )
 }
