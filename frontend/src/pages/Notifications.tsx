@@ -1,3 +1,7 @@
 export default function Notifications() {
-  return <h2 className="text-xl font-semibold">Notifications Page</h2>
+  return (
+    <div className="max-w-5xl mx-auto">
+      <h2 className="text-2xl font-semibold">Notifications</h2>
+    </div>
+  )
 }
