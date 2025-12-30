@@ -1,3 +1,4 @@
+import { useRef, useState } from "react"
 import {
   Upload,
   FileText,
@@ -7,7 +8,49 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
+type DocStatus = "Processing" | "Completed"
+
+interface Document {
+  id: number
+  name: string
+  status: DocStatus
+}
+
 export default function Dashboard() {
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const [documents, setDocuments] = useState<Document[]>([])
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (!e.target.files) return
+
+    const files = Array.from(e.target.files)
+
+    const newDocs: Document[] = files.map((file) => ({
+      id: Date.now() + Math.random(),
+      name: file.name,
+      status: "Processing",
+    }))
+
+    setDocuments((prev) => [...newDocs, ...prev])
+
+    // simulate AI processing
+    setTimeout(() => {
+      setDocuments((prev) =>
+        prev.map((doc) =>
+          newDocs.find((n) => n.id === doc.id)
+            ? { ...doc, status: "Completed" }
+            : doc
+        )
+      )
+    }, 2000)
+  }
+
   return (
     <div className="space-y-8">
 
@@ -17,19 +60,27 @@ export default function Dashboard() {
           Document Intelligence Dashboard
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Upload your documents and let AI generate summaries, mind maps,
-          and structured insights automatically.
+          Upload your documents and let AI generate summaries,
+          mind maps, and structured insights automatically.
         </p>
 
         <div className="mt-4 flex gap-3">
-          <Button>
+          <Button onClick={handleUploadClick}>
             <Upload className="mr-2 h-4 w-4" />
             Upload Documents
           </Button>
 
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleUploadClick}>
             Batch Upload
           </Button>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            hidden
+            onChange={handleFileChange}
+          />
         </div>
       </div>
 
@@ -69,20 +120,21 @@ export default function Dashboard() {
           Recently Processed Documents
         </h2>
 
-        <div className="space-y-3">
-          <DocumentRow
-            name="LLM_Architecture.pdf"
-            status="Completed"
-          />
-          <DocumentRow
-            name="Research_Paper.docx"
-            status="Processing"
-          />
-          <DocumentRow
-            name="Scanned_Notes.png"
-            status="Completed"
-          />
-        </div>
+        {documents.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No documents uploaded yet.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {documents.map((doc) => (
+              <DocumentRow
+                key={doc.id}
+                name={doc.name}
+                status={doc.status}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -117,7 +169,7 @@ function DocumentRow({
   status,
 }: {
   name: string
-  status: "Completed" | "Processing"
+  status: DocStatus
 }) {
   return (
     <div className="flex items-center justify-between rounded-md border p-3">
